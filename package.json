@@ -1,0 +1,21 @@
+{
+  "name": "repolens-development",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Optional formatting, browser tests, and screenshot tools for RepoLens",
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check:js": "node --check static/app.js",
+    "check:format": "prettier --check .",
+    "format": "prettier --write .",
+    "test:ui": "node tests/browser.mjs",
+    "screenshot": "node scripts/screenshot.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.64.0",
+    "prettier": "3.6.2"
+  }
+}

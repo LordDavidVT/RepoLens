@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111719" />
+    <title>RepoLens · Repository insights</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <symbol id="i-grid" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="2" />
+          <rect x="14" y="3" width="7" height="7" rx="2" />
+          <rect x="3" y="14" width="7" height="7" rx="2" />
+          <rect x="14" y="14" width="7" height="7" rx="2" />
+        </symbol>
+        <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 3v17h17M7 14l5-6 4 3 5-6" /></symbol>
+        <symbol id="i-users" viewBox="0 0 24 24">
+          <circle cx="9" cy="7" r="3" />
+          <path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M21 21v-3a6 6 0 0 0-4-5" />
+        </symbol>
+        <symbol id="i-activity" viewBox="0 0 24 24"><path d="M2 12h5l3-8 4 16 3-8h5" /></symbol>
+        <symbol id="i-files" viewBox="0 0 24 24">
+          <path d="M14 2H5v20h14V7zM14 2v6h5M8 12h8M8 16h6" />
+        </symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></symbol>
+        <symbol id="i-link" viewBox="0 0 24 24">
+          <path
+            d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2"
+          />
+        </symbol>
+        <symbol id="i-download" viewBox="0 0 24 24">
+          <path d="M12 3v12M7 10l5 5 5-5M4 16v5h16v-5" />
+        </symbol>
+        <symbol id="i-commit" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M2 12h6M16 12h6" />
+        </symbol>
+        <symbol id="i-calendar" viewBox="0 0 24 24">
+          <rect x="3" y="5" width="18" height="16" rx="3" />
+          <path d="M7 2v6M17 2v6M3 11h18" />
+        </symbol>
+        <symbol id="i-branch" viewBox="0 0 24 24">
+          <circle cx="6" cy="4" r="2" />
+          <circle cx="18" cy="6" r="2" />
+          <circle cx="6" cy="20" r="2" />
+          <path d="M6 6v12M18 8c0 6-12 2-12 8" />
+        </symbol>
+        <symbol id="i-star" viewBox="0 0 24 24">
+          <path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" />
+        </symbol>
+        <symbol id="i-info" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 11v6M12 7v1" />
+        </symbol>
+      </defs>
+    </svg>
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="RepoLens home"
+        ><span class="brand-mark"
+          ><svg class="icon"><use href="#i-chart" /></svg></span
+        >Repo<span>Lens</span><span class="brand-dot">.</span></a
+      >
+      <div class="navigation-label">EXPLORE THE PROJECT</div>
+      <nav aria-label="Dashboard views">
+        <button class="nav-item active" data-view="overview" aria-current="page">
+          <svg class="icon"><use href="#i-grid" /></svg>Overview
+        </button>
+        <button class="nav-item" data-view="contributors">
+          <svg class="icon"><use href="#i-users" /></svg>Contributors
+        </button>
+        <button class="nav-item" data-view="activity">
+          <svg class="icon"><use href="#i-activity" /></svg>Activity
+        </button>
+        <button class="nav-item" data-view="files">
+          <svg class="icon"><use href="#i-files" /></svg>File explorer
+        </button>
+      </nav>
+      <div class="sidebar-note">
+        <span class="tiny-orbit"></span><strong>A little clarity.<br />A lot of history.</strong>
+        <p>Turn your repository’s activity into a story.</p>
+      </div>
+      <div class="sidebar-bottom">
+        <span class="status-dot"></span>Runs locally · No telemetry<small>RepoLens / v1.0.0</small>
+      </div>
+    </aside>
+    <main>
+      <header class="topbar">
+        <div class="breadcrumb">
+          Dashboard <span>/</span> <strong id="breadcrumb-view">Overview</strong>
+        </div>
+        <div class="local-badge"><span class="status-dot"></span>LOCAL APPLICATION</div>
+      </header>
+      <div class="content">
+        <section class="page-heading">
+          <div>
+            <div class="eyebrow">THE BIG PICTURE</div>
+            <h1 id="page-title">Repository insights<span>.</span></h1>
+            <p id="page-subtitle">Less guesswork. More perspective on the code you care about.</p>
+          </div>
+          <button class="button secondary" id="export-button">
+            <svg class="icon"><use href="#i-download" /></svg>Export data
+          </button>
+        </section>
+        <section class="source-card" aria-label="Repository selection">
+          <form id="repository-form">
+            <label for="repo-url" class="field-label">START WITH A REPOSITORY</label>
+            <div class="source-input-row">
+              <div class="url-input">
+                <svg class="icon"><use href="#i-link" /></svg
+                ><input
+                  id="repo-url"
+                  name="url"
+                  type="text"
+                  placeholder="Paste a GitHub or GitLab repository link…"
+                  required
+                  autocomplete="url"
+                  spellcheck="false"
+                  aria-describedby="source-hint"
+                />
+              </div>
+              <button class="button primary" id="analyze-button" type="submit">
+                Analyze repository<svg class="icon"><use href="#i-arrow" /></svg>
+              </button>
+            </div>
+            <div class="source-footer">
+              <span id="source-hint"
+                >GitHub & GitLab <span class="dot-separator">·</span> Public or private
+                <span class="dot-separator">·</span> Full commit history</span
+              ><button
+                class="text-button"
+                id="advanced-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="advanced-options"
+              >
+                Access & options <span aria-hidden="true">⌄</span>
+              </button>
+            </div>
+            <div id="advanced-options" class="advanced-options" hidden>
+              <div>
+                <label for="access-token"
+                  >Read-only access token <span class="muted">(optional)</span></label
+                ><input
+                  id="access-token"
+                  type="password"
+                  autocomplete="off"
+                  placeholder="For private repos or higher API limits"
+                />
+                <p>Sent only to your local server and the repository host. Not saved.</p>
+              </div>
+              <div class="option-checks">
+                <label
+                  ><input id="refresh-option" type="checkbox" checked /> Refresh cached
+                  history</label
+                ><label><input id="exclude-merges" type="checkbox" /> Exclude merge commits</label>
+              </div>
+            </div>
+          </form>
+        </section>
+        <div class="notice demo-notice" id="demo-notice">
+          <span
+            ><svg class="icon"><use href="#i-info" /></svg
+            ><strong>Take a look around.</strong> You’re viewing a synthetic demo. Analyze a
+            repository to see real data.</span
+          ><button class="text-button" id="dismiss-demo" aria-label="Dismiss demo notice">×</button>
+        </div>
+        <div class="notice error-notice" id="error-notice" role="alert" hidden></div>
+        <div class="progress-card" id="progress-card" role="status" aria-live="polite" hidden>
+          <span class="spinner"></span>
+          <div>
+            <strong id="progress-title">Connecting to repository</strong>
+            <p id="progress-detail">Preparing your analysis…</p>
+          </div>
+          <span class="progress-label">WORKING ON IT</span>
+        </div>
+        <div id="dashboard" aria-busy="false">
+          <section class="repo-heading">
+            <div class="repo-identity">
+              <div class="repo-avatar" id="repo-avatar">r</div>
+              <div>
+                <div class="repo-name-row">
+                  <h2>
+                    <span id="repo-namespace">repolens / </span
+                    ><a
+                      id="repo-name"
+                      href="https://github.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >demo-project</a
+                    >
+                  </h2>
+                  <span class="provider-badge" id="provider-badge">DEMO</span>
+                </div>
+                <p id="repo-description">
+                  A small sample of what your repository’s story could look like.
+                </p>
+              </div>
+            </div>
+            <div class="repo-meta">
+              <span
+                ><svg class="icon"><use href="#i-star" /></svg><span id="repo-stars">—</span></span
+              ><span
+                ><svg class="icon"><use href="#i-branch" /></svg
+                ><span id="repo-forks">—</span></span
+              ><span class="branch-badge" id="repo-branch">main</span>
+            </div>
+          </section>
+          <section class="filter-toolbar" aria-label="Date range and chart filters">
+            <div class="period-buttons" role="group" aria-label="Time period">
+              <button data-period="3">3 months</button><button data-period="6">6 months</button
+              ><button data-period="12">1 year</button
+              ><button data-period="all" class="selected">All history</button
+              ><button data-period="custom">Custom</button>
+            </div>
+            <div class="date-inputs">
+              <label
+                ><span class="sr-only">Start date</span
+                ><input id="start-date" type="date" aria-label="Start date" /></label
+              ><span>→</span
+              ><label
+                ><span class="sr-only">End date</span
+                ><input id="end-date" type="date" aria-label="End date" /></label
+              ><button class="button small" id="apply-dates">Apply</button>
+            </div>
+          </section>
+          <section class="stats-grid" aria-label="Repository statistics">
+            <article class="stat-card">
+              <div class="stat-label">
+                Total commits<svg class="icon"><use href="#i-commit" /></svg>
+              </div>
+              <div class="stat-value" id="stat-commits">—</div>
+              <div class="stat-caption" id="commit-caption">In the selected period</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-label">
+                Contributors<svg class="icon"><use href="#i-users" /></svg>
+              </div>
+              <div class="stat-value" id="stat-contributors">—</div>
+              <div class="stat-caption">Unique commit authors</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-label">
+                Active days<svg class="icon"><use href="#i-calendar" /></svg>
+              </div>
+              <div class="stat-value" id="stat-days">—</div>
+              <div class="stat-caption">Days with at least one commit</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-label">
+                Daily average<svg class="icon"><use href="#i-activity" /></svg>
+              </div>
+              <div class="stat-value" id="stat-average">—</div>
+              <div class="stat-caption">Commits per calendar day</div>
+            </article>
+          </section>
+          <div class="dashboard-grid">
+            <section class="panel commits-panel" data-panel="overview activity">
+              <div class="panel-heading">
+                <div>
+                  <h3>Commit activity</h3>
+                  <p>The rhythm of your repository, over time.</p>
+                </div>
+                <div class="chart-controls">
+                  <div class="chart-type-switch" role="group" aria-label="Chart style">
+                    <button
+                      id="area-button"
+                      class="selected"
+                      aria-label="Area chart"
+                      aria-pressed="true"
+                    >
+                      <svg class="icon"><use href="#i-chart" /></svg></button
+                    ><button id="bar-button" aria-label="Bar chart" aria-pressed="false">▥</button>
+                  </div>
+                  <label
+                    ><span class="sr-only">Group commits by</span
+                    ><select id="granularity">
+                      <option value="month">Monthly</option>
+                      <option value="week">Weekly</option>
+                      <option value="day">Daily</option>
+                    </select></label
+                  >
+                </div>
+              </div>
+              <div
+                class="chart-container"
+                id="commit-chart"
+                tabindex="0"
+                aria-label="Commit activity chart"
+              ></div>
+              <div class="chart-footer">
+                <span><span class="legend-dot"></span>Commits <span class="muted">· UTC</span></span
+                ><span id="peak-caption">—</span>
+              </div>
+            </section>
+            <section class="panel contributors-panel" data-panel="overview contributors">
+              <div class="panel-heading">
+                <div>
+                  <h3>Top contributors</h3>
+                  <p>The people moving things forward.</p>
+                </div>
+                <span class="panel-tag" id="contributor-tag">TOP 6</span>
+              </div>
+              <div id="contributor-list" class="contributor-list"></div>
+              <div class="panel-bottom">
+                <span id="contributor-caption">Ranked by commits</span
+                ><button class="text-button" id="view-contributors">View contributors ↗</button>
+              </div>
+            </section>
+            <section class="panel heatmap-panel" data-panel="overview activity">
+              <div class="panel-heading">
+                <div>
+                  <h3>When the work happens</h3>
+                  <p>Commit activity by day of week and hour.</p>
+                </div>
+                <span class="panel-tag">UTC</span>
+              </div>
+              <div id="heatmap" class="heatmap"></div>
+              <div class="chart-footer">
+                <span>Each square is an hour of the week</span
+                ><span class="heatmap-key"
+                  >Less <i class="level-0"></i><i class="level-1"></i><i class="level-2"></i
+                  ><i class="level-3"></i><i class="level-4"></i> More</span
+                >
+              </div>
+            </section>
+            <section class="panel files-panel" data-panel="overview files">
+              <div class="panel-heading">
+                <div>
+                  <h3>What’s in the repo</h3>
+                  <p>File types at the latest revision.</p>
+                </div>
+                <svg class="icon muted"><use href="#i-files" /></svg>
+              </div>
+              <div class="files-content">
+                <div id="file-donut" class="file-donut"></div>
+                <div id="file-legend" class="file-legend"></div>
+              </div>
+              <div class="panel-bottom">
+                <span>By file count, not lines of code</span><span id="file-caption">— files</span>
+              </div>
+            </section>
+            <section class="panel weekdays-panel" data-panel="activity" hidden>
+              <div class="panel-heading">
+                <div>
+                  <h3>A week in commits</h3>
+                  <p>Total commits for each day of the week.</p>
+                </div>
+              </div>
+              <div id="weekday-chart" class="weekday-chart"></div>
+            </section>
+            <section class="panel details-panel" data-panel="files" hidden>
+              <div class="panel-heading">
+                <div>
+                  <h3>Repository details</h3>
+                  <p>A little context for the numbers.</p>
+                </div>
+              </div>
+              <dl id="repository-details" class="repository-details"></dl>
+            </section>
+          </div>
+          <footer class="dashboard-footer">
+            <span
+              ><svg class="icon"><use href="#i-info" /></svg
+              ><span id="scope-note"
+                >Default-branch history · Inclusive dates · UTC timestamps</span
+              ></span
+            ><button
+              class="text-button"
+              id="methodology-toggle"
+              aria-expanded="false"
+              aria-controls="methodology"
+            >
+              How we count ↗
+            </button>
+          </footer>
+          <div class="methodology" id="methodology" hidden>
+            <h3>Behind the numbers</h3>
+            <ul>
+              <li>
+                All commits reachable from the repository’s default branch are included, including
+                merged branches. Unmerged branches are not counted.
+              </li>
+              <li>
+                Dates use committer timestamps in UTC; the start and end dates are inclusive. Empty
+                time buckets are shown as zero.
+              </li>
+              <li>
+                Contributors are grouped by author email, with Git’s mailmap applied. Email
+                addresses are not sent to the dashboard.
+              </li>
+              <li>
+                File types count tracked files at the latest analyzed revision. They are not lines
+                of code and do not change with date filters.
+              </li>
+              <li>
+                GitHub’s open-issue count also includes open pull requests. API metadata may be
+                unavailable when rate-limited or when token scopes are insufficient.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </main>
+    <div class="toast" id="toast" role="status" hidden></div>
+  </body>
+</html>
